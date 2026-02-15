@@ -63,5 +63,4 @@
 4.  Haz Push a la rama (`git push origin feature/nueva-funcionalidad`).
 5.  Abre un Pull Request.
 
----
-Hecho con ❤️ por Manuel y el equipo.
+
