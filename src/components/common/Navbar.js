@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { HelpCircle, Zap, Sun, Moon } from 'lucide-react';
+import { Sun, Moon } from 'lucide-react';
 
 function Navbar({ onNavigate, onStartTutorial, isDarkMode, toggleDarkMode, onOpenAuth, onOpenProfile, isGuest }) {
     const { currentUser, logout } = useAuth();
@@ -48,16 +48,15 @@ function Navbar({ onNavigate, onStartTutorial, isDarkMode, toggleDarkMode, onOpe
             {/* Simulated Desktop Links */}
             {(currentUser || isGuest) && (
                 <div className="tour-nav-links" style={{ display: 'flex', gap: '30px' }}>
-                    {['INICIO', 'OFERTAS', 'MIS CVS'].map(link => (
+                    {['INICIO', 'ENTREVISTAS', 'MIS CVS'].map(link => (
                         <span
                             key={link}
                             onClick={() => {
                                 if (link === 'INICIO') {
                                     onNavigate('dashboard');
                                 } else {
-                                    if (link === 'OFERTAS') onNavigate('jobs');
+                                    if (link === 'ENTREVISTAS') onNavigate('interview');
                                     else if (link === 'MIS CVS') onNavigate('cv-manager');
-                                    else alert('Próximamente');
                                 }
                             }}
                             style={{
@@ -94,23 +93,7 @@ function Navbar({ onNavigate, onStartTutorial, isDarkMode, toggleDarkMode, onOpe
                     {isDarkMode ? <Sun size={32} /> : <Moon size={32} />}
                 </button>
 
-                <div
-                    onClick={onStartTutorial}
-                    style={{
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: 'rgba(255, 255, 255, 0.2)',
-                        padding: '10px',
-                        borderRadius: '50%',
-                        border: '2px solid white',
-                        backdropFilter: 'blur(5px)',
-                    }}
-                    title="Iniciar Tutorial"
-                >
-                    <HelpCircle color="white" size={24} />
-                </div>
+
 
 
                 {currentUser ? (
@@ -122,29 +105,7 @@ function Navbar({ onNavigate, onStartTutorial, isDarkMode, toggleDarkMode, onOpe
                         border: '2px solid white',
                         backdropFilter: 'blur(5px)'
                     }}>
-                        <button
-                            onClick={() => onNavigate('upgrade')}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '5px',
-                                background: 'linear-gradient(45deg, #facc15, #ca8a04)',
-                                border: 'none',
-                                borderBottom: '4px solid #854d0e',
-                                color: '#422006',
-                                padding: '5px 15px',
-                                borderRadius: '8px',
-                                cursor: 'pointer',
-                                fontFamily: "'VT323', monospace",
-                                fontSize: '1.2rem',
-                                fontWeight: 'bold',
-                                boxShadow: '0 0 10px rgba(250, 204, 21, 0.5)',
-                                animation: 'pulse 2s infinite',
-                                marginRight: '10px'
-                            }}
-                        >
-                            <Zap size={18} fill="#422006" /> MEJORAR PLAN
-                        </button>
+
 
                         <div
                             onClick={onOpenProfile}

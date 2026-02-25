@@ -1,33 +1,21 @@
-# Wingman 🐦 | Tu Copiloto Laboral con IA
+# Wingman | Gestor de Currículums
 
 ![Menú Principal Wingman](public/captura.png)
-*Tu centro de operaciones para la búsqueda de empleo*
+*Tu centro de operaciones para la gestión de CVs*
 
-**Wingman** es una aplicación inteligente diseñada para revolucionar tu búsqueda de empleo. Integra herramientas avanzadas de Inteligencia Artificial para optimizar tu CV, prepararte para entrevistas y gestionar ofertas de trabajo en un solo lugar.
+**Wingman** es una aplicación diseñada para agilizar tu búsqueda de empleo. Te permite editar y gestionar tus CVs en un solo lugar.
 
-## 🚀 Características Principales
+## Características Principales
 
-### 📄 Editor de CV Inteligente
+### Editor de CV
 ![Editor de CV](public/captura3.png)
 *   **Edición en Tiempo Real**: Visualiza los cambios de tu currículum al instante.
 *   **Estructura JSON**: Gestión de datos robusta y portátil.
 *   **Diseño Profesional**: Plantillas limpias y optimizadas para ATS.
 
-### 🎙️ Modo Entrevista Inmersivo
-![Modo Entrevista con Paloma](public/captura2.png)
-*   **Simulador de Voz**: Practica entrevistas con un avatar de IA (`Paloma`) que habla y escucha.
-*   **Feedback Instantáneo**: Recibe consejos sobre tus respuestas al momento.
-*   **Contexto Adaptable**: Entrevistas generales o específicas para una oferta de trabajo concreta.
-
-### 💼 Tablón de Empleos
-*   **Gestión de Ofertas**: Sube y organiza las ofertas de trabajo que te interesan.
-*   **Análisis Automático**: La IA analiza la oferta y te dice cómo encaja con tu perfil.
-
-## 🛠️ Tecnologías
+## Tecnologías
 
 *   **Frontend**: React.js
-*   **IA**: OpenAI GPT-4o-mini (API)
-*   **Voz**: Web Speech API (Synthesis & Recognition)
 *   **Estilos**: CSS Modules & Modern UI
 *   **Persistencia**: LocalStorage
 
@@ -44,13 +32,7 @@
     npm install
     ```
 
-3.  **Configurar Variables de Entorno**:
-    Crea un archivo `.env` en la raíz del proyecto y añade tu clave de OpenAI:
-    ```env
-    REACT_APP_OPENAI_API_KEY=sk-tu-clave-aqui...
-    ```
-
-4.  **Arrancar la aplicación**:
+3.  **Arrancar la aplicación**:
     ```bash
     npm start
     ```

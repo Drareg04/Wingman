@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import CVForm from './CVForm';
-import CVPreview from './CVPreview';
-import TemplateSelector from './TemplateSelector';
 import { storageService } from '../../services/storage';
 import { useAuth } from '../../context/AuthContext';
 
@@ -92,52 +90,44 @@ function CVEditor({ cvId, onBack }) {
         }));
     };
 
-    if (loading || !cvData) return <div style={{ padding: 20, color: 'white' }}>Cargando Editor...</div>;
+    if (loading || !cvData) return <div style={{ padding: 20, color: 'white' }}>Cargando Editor Básico...</div>;
 
     return (
         <div className="cv-editor-container" style={{
             display: 'flex',
+            justifyContent: 'center',
             height: '100vh',
-            padding: '20px',
+            padding: '40px',
             boxSizing: 'border-box',
-            gap: '20px',
             position: 'relative',
-            zIndex: 10
+            zIndex: 10,
+            overflowY: 'auto'
         }}>
-            {/* Left: Form Sidebar (Floating Window) */}
             <div className="glass-window" style={{
-                width: '450px',
+                width: '600px',
                 display: 'flex',
                 flexDirection: 'column',
-                overflow: 'hidden',
-                flexShrink: 0
+                background: 'white',
+                borderRadius: '15px',
+                padding: '30px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
             }}>
-                {/* Internal Toolbar (Inside Window) */}
-                <div style={{ padding: '15px', borderBottom: '2px solid #ddd', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                    <button onClick={onBack} className="btn-pixel btn-pixel-gray" style={{ fontSize: '0.7rem' }}>Volver</button>
-                    <button onClick={handleSave} className="btn-pixel btn-pixel-green" style={{ fontSize: '0.7rem', flex: 1 }}>GUARDAR</button>
-                    <button onClick={() => window.print()} className="btn-pixel btn-pixel-orange" style={{ fontSize: '0.7rem' }}>PDF</button>
+                <div style={{ paddingBottom: '15px', borderBottom: '2px solid #ddd', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <button onClick={onBack} style={{ padding: '8px 15px', cursor: 'pointer', background: '#e2e8f0', border: 'none', borderRadius: '5px' }}>⬅ Volver</button>
+                    <h2 style={{ margin: 0, fontFamily: "'Nunito', sans-serif" }}>Editor CV Básico (Sprint 1)</h2>
+                    <button onClick={handleSave} style={{ padding: '8px 15px', cursor: 'pointer', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '5px' }}>Guardar</button>
                 </div>
 
-                <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
-                    <div style={{ marginBottom: '20px' }}>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 'bold', color: '#666', marginBottom: '5px' }}>Nombre del Proyecto</label>
-                        <input
-                            value={cvName}
-                            onChange={(e) => setCvName(e.target.value)}
-                            style={{
-                                width: '100%', padding: '10px', border: '2px solid #ddd', borderRadius: '8px',
-                                fontWeight: 'bold', boxSizing: 'border-box'
-                            }}
-                        />
-                    </div>
-
-                    <h3 style={{ margin: '0 0 10px 0', fontSize: '1.2rem', color: '#333' }}>🎨 Diseño</h3>
-                    <TemplateSelector
-                        selectedTemplate={cvData.template || 'modern'}
-                        onSelect={(tpl) => handleChange(null, 'template', tpl)}
+                <div style={{ marginTop: '20px' }}>
+                    <label style={{ display: 'block', fontSize: '1rem', fontWeight: 'bold', color: '#333', marginBottom: '5px' }}>Nombre del Documento</label>
+                    <input
+                        value={cvName}
+                        onChange={(e) => setCvName(e.target.value)}
+                        style={{
+                            width: '100%', padding: '10px', border: '2px solid #ddd', borderRadius: '8px',
+                            fontWeight: 'bold', boxSizing: 'border-box', marginBottom: '30px'
+                        }}
                     />
-                    <hr style={{ border: 'none', borderBottom: '1px solid #e2e8f0', margin: '20px 0' }} />
 
                     <CVForm
                         data={cvData}
@@ -146,19 +136,6 @@ function CVEditor({ cvId, onBack }) {
                         onRemove={removeItem}
                     />
                 </div>
-            </div>
-
-            {/* Right: Preview (Floating) */}
-            <div className="no-scrollbar" style={{
-                flex: 1,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'flex-start',
-                overflowY: 'auto',
-                overflowX: 'hidden',
-                padding: '20px'
-            }}>
-                <CVPreview data={cvData} template={cvData.template || 'modern'} />
             </div>
         </div>
     );

@@ -142,6 +142,11 @@ body {
     background-image: var(--bg-1);
   }
 
+  25%,
+  75% {
+    background-image: var(--bg-3);
+  }
+
   50% {
     background-image: var(--bg-2);
   }
@@ -183,6 +188,37 @@ body {
 
 .flying-dove.bat {
   animation: flyAcross 7s linear infinite, flapBatWings 0.3s infinite steps(1);
+}
+
+.dove-drop {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  top: 70%;
+  left: 65%;
+  /* Back half of the dove */
+  opacity: 1;
+  /* Make it visible from the start */
+  animation: dropPoop 1s linear infinite;
+  /* Drops continuously every second for debugging */
+  pointer-events: none;
+  z-index: 100;
+  /* Ensure it renders above the background and clouds */
+}
+
+/* Continuously dropping for debugging */
+@keyframes dropPoop {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(800px) scale(1) rotate(180deg);
+  }
 }
 
 @keyframes pulse {

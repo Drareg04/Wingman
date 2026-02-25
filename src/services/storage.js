@@ -1,4 +1,5 @@
-import { auth } from './firebase';
+// Auth is now mocked. We use a generic fallback if user is not provided explicitly.
+const genericGuest = { uid: 'guest123' };
 
 const STORAGE_KEYS = {
     USER: 'wingman_user',
@@ -6,7 +7,7 @@ const STORAGE_KEYS = {
     CV: 'wingman_cv_data'
 };
 
-const getStorageKey = (baseKey, user = auth.currentUser) => {
+const getStorageKey = (baseKey, user = genericGuest) => {
     return user ? `${baseKey}_${user.uid}` : `${baseKey}_guest`;
 };
 
@@ -32,18 +33,18 @@ const DEFAULT_CV = {
 
 export const storageService = {
     // USER
-    getUser: (user = auth.currentUser) => {
+    getUser: (user = genericGuest) => {
         const key = getStorageKey(STORAGE_KEYS.USER, user);
         const data = localStorage.getItem(key);
         return data ? JSON.parse(data) : DEFAULT_USER;
     },
-    saveUser: (userData, user = auth.currentUser) => {
+    saveUser: (userData, user = genericGuest) => {
         const key = getStorageKey(STORAGE_KEYS.USER, user);
         localStorage.setItem(key, JSON.stringify(userData));
     },
 
     // JOBS
-    getJobs: (user = auth.currentUser) => {
+    getJobs: (user = genericGuest) => {
         const key = getStorageKey(STORAGE_KEYS.JOBS, user);
         const data = localStorage.getItem(key);
         if (!data) {
@@ -52,7 +53,7 @@ export const storageService = {
         }
         return JSON.parse(data);
     },
-    addJob: (job, user = auth.currentUser) => {
+    addJob: (job, user = genericGuest) => {
         const jobs = storageService.getJobs(user);
         const newJob = { ...job, id: Date.now(), status: "Pendiente" };
         jobs.push(newJob);
@@ -60,14 +61,14 @@ export const storageService = {
         localStorage.setItem(key, JSON.stringify(jobs));
         return newJob;
     },
-    updateJobStatus: (id, status, user = auth.currentUser) => {
+    updateJobStatus: (id, status, user = genericGuest) => {
         const jobs = storageService.getJobs(user).map(j => j.id === id ? { ...j, status } : j);
         const key = getStorageKey(STORAGE_KEYS.JOBS, user);
         localStorage.setItem(key, JSON.stringify(jobs));
     },
 
     // CV (Structured & Multi-CV)
-    getCVs: (user = auth.currentUser) => {
+    getCVs: (user = genericGuest) => {
         const key = getStorageKey(STORAGE_KEYS.CV, user);
         const data = localStorage.getItem(key);
         if (!data) return [];
@@ -83,12 +84,12 @@ export const storageService = {
         }
     },
 
-    getCVById: (id, user = auth.currentUser) => {
+    getCVById: (id, user = genericGuest) => {
         const cvs = storageService.getCVs(user);
         return cvs.find(cv => cv.id === id) || null;
     },
 
-    saveCV: (id, cvData, name = "Sin título", user = auth.currentUser) => {
+    saveCV: (id, cvData, name = "Sin título", user = genericGuest) => {
         const cvs = storageService.getCVs(user);
         const existingIndex = cvs.findIndex(cv => cv.id === id);
 
@@ -110,19 +111,19 @@ export const storageService = {
         return newCV.id;
     },
 
-    deleteCV: (id, user = auth.currentUser) => {
+    deleteCV: (id, user = genericGuest) => {
         const cvs = storageService.getCVs(user).filter(cv => cv.id !== id);
         const key = getStorageKey(STORAGE_KEYS.CV, user);
         localStorage.setItem(key, JSON.stringify(cvs));
     },
 
     // Create a new blank CV
-    createCV: (name, user = auth.currentUser) => {
+    createCV: (name, user = genericGuest) => {
         return storageService.saveCV(Date.now().toString(), DEFAULT_CV, name, user);
     },
 
     // Legacy CV helper (returns the first one or default)
-    getCVString: (user = auth.currentUser) => {
+    getCVString: (user = genericGuest) => {
         const cvs = storageService.getCVs(user);
         const cv = cvs.length > 0 ? cvs[0].data : DEFAULT_CV;
         // Convert Structured Object to String for AI

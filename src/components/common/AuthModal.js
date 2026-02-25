@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Mail, Lock, User, X } from 'lucide-react';
 
 function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
-    const { loginWithGoogle, loginWithEmail, registerWithEmail } = useAuth();
+    const { loginWithEmail, registerWithEmail } = useAuth();
     const [isLogin, setIsLogin] = useState(initialMode === 'login');
 
     useEffect(() => {
@@ -126,29 +126,7 @@ function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
                     </button>
                 </form>
 
-                <div style={{ margin: '20px 0', color: '#94a3b8', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ borderBottom: '1px solid #e2e8f0', flex: 1, margin: '0 10px' }}></span>
-                    O
-                    <span style={{ borderBottom: '1px solid #e2e8f0', flex: 1, margin: '0 10px' }}></span>
-                </div>
 
-                <button
-                    onClick={async () => {
-                        await loginWithGoogle();
-                        onClose();
-                    }}
-                    style={{
-                        background: 'white', border: '2px solid #e2e8f0', color: '#333',
-                        padding: '12px', borderRadius: '12px', cursor: 'pointer',
-                        width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                        fontWeight: 'bold', fontSize: '1rem', transition: 'background 0.2s'
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'white'}
-                >
-                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google" style={{ width: '20px' }} />
-                    Continuar con Google
-                </button>
 
                 <div style={{ marginTop: '20px', fontSize: '0.9rem', color: '#64748b' }}>
                     {isLogin ? '¿No tienes cuenta? ' : '¿Ya tienes cuenta? '}

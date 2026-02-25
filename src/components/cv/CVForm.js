@@ -1,5 +1,4 @@
 import React from 'react';
-import UniversitySearch from './UniversitySearch';
 
 function CVForm({ data, onChange, onAdd, onRemove }) {
 
@@ -7,12 +6,7 @@ function CVForm({ data, onChange, onAdd, onRemove }) {
     const sectionStyle = { padding: '20px', borderBottom: '1px solid #eee' };
     const labelStyle = { display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem', color: '#475569' };
 
-    const handleUniversityChange = (val, index) => {
-        // val is { name: "University Name", logo: "https://..." }
-        // We update both school name and the logo
-        onChange('education', 'school', val.name, index);
-        onChange('education', 'schoolLogo', val.logo, index);
-    };
+
 
     return (
         <div>
@@ -49,24 +43,9 @@ function CVForm({ data, onChange, onAdd, onRemove }) {
                     value={data.personalInfo?.phone || ''}
                     onChange={(e) => onChange('personalInfo', 'phone', e.target.value)}
                 />
-
-                <label style={labelStyle}>Foto de Perfil</label>
-                <input
-                    type="file"
-                    accept="image/*"
-                    style={inputStyle}
-                    onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                                onChange('personalInfo', 'photo', reader.result);
-                            };
-                            reader.readAsDataURL(file);
-                        }
-                    }}
-                />
             </div>
+
+
 
             {/* --- SUMMARY --- */}
             <div style={sectionStyle}>
@@ -153,21 +132,13 @@ function CVForm({ data, onChange, onAdd, onRemove }) {
                             placeholder="Título (ej. Grado en Ingeniería)"
                         />
 
-                        {/* New University Search Component */}
-                        <div style={{ marginBottom: '10px' }}>
-                            <UniversitySearch
-                                value={edu.school}
-                                onChange={(val) => {
-                                    if (typeof val === 'object') {
-                                        handleUniversityChange(val, index);
-                                    } else {
-                                        onChange('education', 'school', val, index);
-                                    }
-                                }}
-                                placeholder="Institución (Busca para auto-logo)"
-                                style={inputStyle}
-                            />
-                        </div>
+                        <input
+                            type="text"
+                            style={inputStyle}
+                            value={edu.school}
+                            onChange={(e) => onChange('education', 'school', e.target.value, index)}
+                            placeholder="Institución Educativa (Texto libre)"
+                        />
 
                         <input
                             type="text"
