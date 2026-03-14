@@ -1,4 +1,5 @@
 import React from 'react';
+import EducationalCentreSelect from './EducationalCentreSelect';
 
 function CVForm({ data, onChange, onAdd, onRemove }) {
 
@@ -132,13 +133,26 @@ function CVForm({ data, onChange, onAdd, onRemove }) {
                             placeholder="Título (ej. Grado en Ingeniería)"
                         />
 
-                        <input
-                            type="text"
+                        <EducationalCentreSelect
+                            value={edu.schoolMeta || edu.school || ''}
+                            onChange={(val) => {
+                                if (typeof val === 'string') {
+                                    onChange('education', 'school', val, index);
+                                    onChange('education', 'schoolMeta', null, index);
+                                } else {
+                                    onChange('education', 'school', val.name || '', index);
+                                    onChange('education', 'schoolMeta', val, index);
+                                }
+                            }}
+                            placeholder="Institución Educativa (busca y filtra)"
                             style={inputStyle}
-                            value={edu.school}
-                            onChange={(e) => onChange('education', 'school', e.target.value, index)}
-                            placeholder="Institución Educativa (Texto libre)"
                         />
+
+                        {edu.schoolMeta && (edu.schoolMeta.addresses_road_name || edu.schoolMeta.addresses_town) && (
+                            <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '-6px', marginBottom: '10px' }}>
+                                {edu.schoolMeta.addresses_road_name}{edu.schoolMeta.addresses_road_name && edu.schoolMeta.addresses_town ? ' · ' : ''}{edu.schoolMeta.addresses_town}
+                            </div>
+                        )}
 
                         <input
                             type="text"
