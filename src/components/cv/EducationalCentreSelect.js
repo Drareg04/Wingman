@@ -112,7 +112,7 @@ export default function EducationalCentreSelect({ value, onChange, placeholder, 
   return (
     <div ref={wrapperRef} style={{ position: 'relative' }}>
       <input
-        type="text"
+        type='text'
         value={query}
         placeholder={placeholder}
         style={style}
@@ -145,7 +145,7 @@ export default function EducationalCentreSelect({ value, onChange, placeholder, 
             {results.map((c, idx) => (
               <button
                 key={`${c.name}-${c.addresses_road_name}-${c.addresses_town}-${idx}`}
-                type="button"
+                type='button'
                 onClick={() => handleSelect(c)}
                 style={{
                   width: '100%',
@@ -180,7 +180,7 @@ export default function EducationalCentreSelect({ value, onChange, placeholder, 
               }}
             >
               <button
-                type="button"
+                type='button'
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page <= 1}
                 style={{
@@ -217,9 +217,7 @@ export default function EducationalCentreSelect({ value, onChange, placeholder, 
                 {pagesToShow[0] > 1 && (
                   <>
                     <PageBtn n={1} active={page === 1} onClick={() => setPage(1)} />
-                    {pagesToShow[0] > 2 && (
-                      <span style={{ color: '#94a3b8', fontWeight: 900, flexShrink: 0 }}>…</span>
-                    )}
+                    {pagesToShow[0] > 2 && <span style={{ color: '#94a3b8', fontWeight: 900, flexShrink: 0 }}>…</span>}
                   </>
                 )}
 
@@ -229,16 +227,14 @@ export default function EducationalCentreSelect({ value, onChange, placeholder, 
 
                 {pagesToShow[pagesToShow.length - 1] < totalPages && (
                   <>
-                    {pagesToShow[pagesToShow.length - 1] < totalPages - 1 && (
-                      <span style={{ color: '#94a3b8', fontWeight: 900, flexShrink: 0 }}>…</span>
-                    )}
+                    {pagesToShow[pagesToShow.length - 1] < totalPages - 1 && <span style={{ color: '#94a3b8', fontWeight: 900, flexShrink: 0 }}>…</span>}
                     <PageBtn n={totalPages} active={page === totalPages} onClick={() => setPage(totalPages)} />
                   </>
                 )}
               </div>
 
               <button
-                type="button"
+                type='button'
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages}
                 style={{
@@ -265,7 +261,7 @@ export default function EducationalCentreSelect({ value, onChange, placeholder, 
 function PageBtn({ n, active, onClick }) {
   return (
     <button
-      type="button"
+      type='button'
       onClick={onClick}
       style={{
         border: 'none',

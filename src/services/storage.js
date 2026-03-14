@@ -73,13 +73,14 @@ const buildCVDataFromAnswers = (answers = {}) => {
     .map(ed => {
       const schoolVal = ed?.school
       const schoolName = typeof schoolVal === 'string' ? schoolVal : schoolVal?.name || ''
-      const schoolMeta = typeof schoolVal === 'object' && schoolVal
-        ? {
-            name: schoolVal?.name || '',
-            addresses_road_name: schoolVal?.addresses_road_name || '',
-            addresses_town: schoolVal?.addresses_town || '',
-          }
-        : null
+      const schoolMeta =
+        typeof schoolVal === 'object' && schoolVal
+          ? {
+              name: schoolVal?.name || '',
+              addresses_road_name: schoolVal?.addresses_road_name || '',
+              addresses_town: schoolVal?.addresses_town || '',
+            }
+          : null
 
       return {
         degree: ed?.degree || '',

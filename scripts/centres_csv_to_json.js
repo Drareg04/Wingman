@@ -45,7 +45,7 @@ function parseCSVLine(line) {
   return out
 }
 
-const cleanHeader = (h) => {
+const cleanHeader = h => {
   if (!h) return ''
   return h
     .replace(/\uFEFF/g, '') // BOM
