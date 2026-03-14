@@ -36,6 +36,7 @@ function CVEditor({ cvId, onBack }) {
     if (cvWrapper) {
       setCvData(cvWrapper.data || {})
       setCvName(cvWrapper.name || 'Mi CV')
+      setSelectedTemplate((cvWrapper.data && cvWrapper.data.template) || 'modern')
     }
   }, [cvWrapper])
 
@@ -170,7 +171,6 @@ function CVEditor({ cvId, onBack }) {
 
       {/* --- MAIN LAYOUT: Form Left | Preview Center | Templates Right --- */}
       <div style={{ display: 'flex', gap: '15px', alignItems: 'flex-start' }}>
-
         {/* LEFT: Form Panel — scroll inside, fixed height */}
         <div
           style={{
