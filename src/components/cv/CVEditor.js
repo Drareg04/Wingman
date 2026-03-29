@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
 import CVForm from './CVForm'
 import CVPreview from './CVPreview'
 import TemplateSelector from './TemplateSelector'
@@ -44,6 +46,78 @@ function CVEditor({ cvId, onBack }) {
     if (!cvData) return
     await storageService.saveCV(cvId, cvData, cvName, currentUser)
     alert('CV Guardado correctamente')
+  }
+
+  const handleExportPDF = async () => {
+    const paper = document.querySelector('.cv-print-root .cv-paper')
+    if (!paper) {
+      alert('No se pudo encontrar el CV para exportar.')
+      return
+    }
+
+    const renderToPdf = async canvas => {
+      const imgData = canvas.toDataURL('image/jpeg', 0.95)
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true })
+
+      const pageWidth = pdf.internal.pageSize.getWidth()
+      const pageHeight = pdf.internal.pageSize.getHeight()
+
+      const imgWidth = pageWidth
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
+
+      let heightLeft = imgHeight
+      let position = 0
+
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST')
+      heightLeft -= pageHeight
+
+      while (heightLeft > 1) {
+        position -= pageHeight
+        pdf.addPage()
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST')
+        heightLeft -= pageHeight
+      }
+
+      const safeName = (cvName || 'CV').replace(/[^a-z0-9-_ ]/gi, '').trim() || 'CV'
+      pdf.save(`${safeName}.pdf`)
+    }
+
+    // 1) Primer intento: con CORS habilitado
+    try {
+      const canvas = await html2canvas(paper, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        logging: false,
+      })
+      await renderToPdf(canvas)
+      return
+    } catch (e1) {
+      console.error('PDF export first attempt failed:', e1)
+    }
+
+    // 2) Segundo intento: ignorar imágenes externas problemáticas
+    try {
+      const canvas = await html2canvas(paper, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: false,
+        allowTaint: true,
+        logging: false,
+        ignoreElements: el => {
+          // Si alguna imagen/logo rompe por CORS, la omitimos
+          if (el && el.tagName === 'IMG') return true
+          return false
+        },
+      })
+      await renderToPdf(canvas)
+      alert('PDF exportado. Nota: se han omitido imágenes para evitar errores de CORS.')
+      return
+    } catch (e2) {
+      console.error('PDF export second attempt failed:', e2)
+      alert('No se pudo exportar a PDF. Revisa si tienes imágenes/fotos en el CV (pueden bloquearse por CORS).')
+    }
   }
 
   const handleChange = (section, field, value, index = null) => {
@@ -98,6 +172,7 @@ function CVEditor({ cvId, onBack }) {
 
   return (
     <div
+      className='cv-editor-container'
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -153,6 +228,24 @@ function CVEditor({ cvId, onBack }) {
         />
 
         <button
+          onClick={handleExportPDF}
+          className='btn-export'
+          style={{
+            padding: '8px 18px',
+            cursor: 'pointer',
+            background: '#3b82f6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontWeight: 'bold',
+            whiteSpace: 'nowrap',
+          }}
+          title='Abre el diálogo de impresión para guardar como PDF'
+        >
+          ⬇️ PDF
+        </button>
+
+        <button
           onClick={handleSave}
           style={{
             padding: '8px 20px',
@@ -203,6 +296,11 @@ function CVEditor({ cvId, onBack }) {
             overflow: 'hidden',
           }}
         >
+          {/*
+            Pantalla: usamos zoom para encajar en el panel.
+            Impresión: renderizamos una copia a tamaño 100% (sin zoom) y 
+            la hacemos visible vía @media print (App.css).
+          */}
           <div style={{ zoom: 0.7, width: '210mm' }}>
             <CVPreview data={cvData} template={selectedTemplate} />
           </div>
@@ -236,6 +334,27 @@ function CVEditor({ cvId, onBack }) {
           </p>
           <TemplateSelector selectedTemplate={selectedTemplate} onSelect={setSelectedTemplate} />
         </div>
+      </div>
+
+      {/*
+        Printable/exportable version (offscreen):
+        - Debe estar renderizada (NO display:none) para que html2canvas pueda capturarla.
+        - La sacamos del flujo visual.
+      */}
+      <div
+        className='cv-print-root'
+        style={{
+          position: 'fixed',
+          left: '-10000px',
+          top: 0,
+          width: '210mm',
+          background: 'white',
+          zIndex: -1,
+          pointerEvents: 'none',
+          opacity: 0,
+        }}
+      >
+        <CVPreview data={cvData} template={selectedTemplate} />
       </div>
     </div>
   )
