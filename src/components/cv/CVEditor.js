@@ -298,7 +298,7 @@ function CVEditor({ cvId, onBack }) {
         >
           {/*
             Pantalla: usamos zoom para encajar en el panel.
-            Impresión: renderizamos una copia a tamaño 100% (sin zoom) y 
+            Impresión: renderizamos una copia a tamaño 100% (sin zoom) y
             la hacemos visible vía @media print (App.css).
           */}
           <div style={{ zoom: 0.7, width: '210mm' }}>

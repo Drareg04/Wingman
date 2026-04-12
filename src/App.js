@@ -12,6 +12,7 @@ import Navbar from './components/common/Navbar'
 import AuthModal from './components/common/AuthModal'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import TemplatePickerModal from './components/cv/TemplatePickerModal'
+import InterviewMode from './components/interview/InterviewMode'
 
 function App() {
   return (
@@ -51,7 +52,7 @@ function AppInner() {
     } else if (mode === 'create-cv-questions') {
       setStep('cv-questions')
     } else if (mode === 'interview' || mode === 'voice') {
-      // Do nothing
+      setStep('interview')
     } else if (mode === 'cv-fix') {
       // Do nothing
     } else if (mode === 'dashboard') {
@@ -161,17 +162,17 @@ function AppInner() {
 
         {step === 'cv-questions' && <CVQuestionnaire onCancel={() => setStep('dashboard')} onFinish={handleFinishQuestions} />}
 
-        {/* Oculto en Sprint 1
         {step === 'interview' && (
           <InterviewMode
-            cvText={storageService.getCVString()}
-            activeOffer={activeOffer}
-            onClearOffer={() => setActiveOffer(null)}
-            initialMode={interviewMode}
+            cvText={storageService.getCVString(currentUser || undefined)}
+            activeOffer={null}
+            onClearOffer={() => {}}
+            initialMode={'chat'}
             onBack={goDashboard}
           />
         )}
 
+        {/* Oculto en Sprint 1
         {step === 'upgrade' && (
           <UpgradePlan onBack={goDashboard} />
         )}
