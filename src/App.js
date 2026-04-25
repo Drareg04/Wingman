@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import './App.css'
 import { storageService } from './services/storage'
+import { offersService } from './services/offers'
 
 // Component Imports
 import Dashboard from './components/dashboard/Dashboard'
@@ -9,6 +10,7 @@ import CVEditor from './components/cv/CVEditor'
 import CVQuestionnaire from './components/cv/CVQuestionnaire'
 import Navbar from './components/common/Navbar'
 import JobBoard from './components/jobs/JobBoard'
+import InterviewMode from './components/interview/InterviewMode'
 
 import AuthModal from './components/common/AuthModal'
 import { AuthProvider, useAuth } from './context/AuthContext'
@@ -145,11 +147,20 @@ function AppInner() {
         {step === 'jobs' && (
           <JobBoard
             onSelectOffer={offer => {
-              // JobBoard expects an offer selection callback. For now we just navigate to interview.
-              // Next commits: persist active offer + navigate with context.
-              console.log('Offer selected:', offer)
+              // Persist active offer (JobBoard already does it, but keep it safe here too).
+              if (offer?.id) offersService.setActiveOffer(offer.id)
               setStep('interview')
             }}
+            onBack={goDashboard}
+          />
+        )}
+
+        {step === 'interview' && (
+          <InterviewMode
+            cvText={storageService.getCVString()}
+            activeOffer={offersService.getActiveOffer()}
+            onClearOffer={() => offersService.clearActiveOffer()}
+            initialMode={'chat'}
             onBack={goDashboard}
           />
         )}
