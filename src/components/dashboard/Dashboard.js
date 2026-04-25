@@ -70,7 +70,7 @@ export default function Dashboard({ onSelectMode }) {
         floatClass='float-4'
         tourClass='tour-jobs'
         backgroundImage="url('/nube.png')"
-        onAction={() => {}}
+        onAction={onSelectMode}
       />
 
       <CloudButton

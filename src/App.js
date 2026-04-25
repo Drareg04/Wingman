@@ -8,6 +8,7 @@ import CVManager from './components/cv/CVManager'
 import CVEditor from './components/cv/CVEditor'
 import CVQuestionnaire from './components/cv/CVQuestionnaire'
 import Navbar from './components/common/Navbar'
+import JobBoard from './components/jobs/JobBoard'
 
 import AuthModal from './components/common/AuthModal'
 import { AuthProvider, useAuth } from './context/AuthContext'
@@ -45,13 +46,13 @@ function AppInner() {
 
   const handleSelectMode = mode => {
     if (mode === 'jobs') {
-      // Do nothing
+      setStep('jobs')
     } else if (mode === 'create-cv') {
       setStep('cv-manager')
     } else if (mode === 'create-cv-questions') {
       setStep('cv-questions')
     } else if (mode === 'interview' || mode === 'voice') {
-      // Do nothing
+      setStep('interview')
     } else if (mode === 'cv-fix') {
       // Do nothing
     } else if (mode === 'dashboard') {
@@ -141,14 +142,17 @@ function AppInner() {
       <div className='app-content'>
         {step === 'dashboard' && <DashboardWrapper onSelectMode={handleSelectMode} isGuest={isGuest} onGuestLogin={handleGuestLogin} onOpenAuth={openAuthModal} />}
 
-        {/* Oculto en Sprint 1
         {step === 'jobs' && (
           <JobBoard
-            onSelectOffer={handleSelectOffer}
+            onSelectOffer={offer => {
+              // JobBoard expects an offer selection callback. For now we just navigate to interview.
+              // Next commits: persist active offer + navigate with context.
+              console.log('Offer selected:', offer)
+              setStep('interview')
+            }}
             onBack={goDashboard}
           />
         )}
-        */}
 
         {step === 'cv-manager' && <CVManager onSelectCV={handleSelectCV} onBack={goDashboard} />}
 
