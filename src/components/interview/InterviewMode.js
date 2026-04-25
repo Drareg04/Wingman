@@ -11,6 +11,10 @@ function InterviewMode({ cvText, activeOffer, onClearOffer, initialMode = 'chat'
 
     const [isListening, setIsListening] = useState(false);
     const [isSpeaking, setIsSpeaking] = useState(false);
+
+    // Speech language (dictation + TTS)
+    const [speechLang, setSpeechLang] = useState('es-ES');
+
     const synthesisRef = useRef(window.speechSynthesis);
     const recognitionRef = useRef(null);
     const chatEndRef = useRef(null);
@@ -57,11 +61,11 @@ function InterviewMode({ cvText, activeOffer, onClearOffer, initialMode = 'chat'
         if (!synthesisRef.current) return;
         synthesisRef.current.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'es-ES';
+        utterance.lang = speechLang;
         utterance.onstart = () => setIsSpeaking(true);
         utterance.onend = handleSpeechEnd;
         synthesisRef.current.speak(utterance);
-    }, []); // Empty dependencies as we use refs/cancel
+    }, [speechLang]);
 
     // --- INIT ---
     useEffect(() => {
@@ -84,7 +88,7 @@ function InterviewMode({ cvText, activeOffer, onClearOffer, initialMode = 'chat'
             recognitionRef.current = new SpeechRecognition();
             recognitionRef.current.continuous = true;
             recognitionRef.current.interimResults = true;
-            recognitionRef.current.lang = 'es-ES';
+            recognitionRef.current.lang = speechLang;
 
             recognitionRef.current.onresult = (event) => {
                 let interim = '';
@@ -125,6 +129,19 @@ function InterviewMode({ cvText, activeOffer, onClearOffer, initialMode = 'chat'
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // When language changes, apply it to recognition and restart if currently listening
+    useEffect(() => {
+        if (!recognitionRef.current) return;
+        recognitionRef.current.lang = speechLang;
+        if (isListening) {
+            try { recognitionRef.current.stop(); } catch (e) { }
+            setTimeout(() => {
+                try { recognitionRef.current.start(); } catch (e) { }
+            }, 150);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [speechLang]);
 
     useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [history, loading]);
 
@@ -236,11 +253,43 @@ function InterviewMode({ cvText, activeOffer, onClearOffer, initialMode = 'chat'
                 >
                     ⬅ SALIR
                 </button>
-                <div style={{ fontSize: '0.9rem', color: '#64748b' }}>
-                    MODO CHAT
-                    <button onClick={() => setMode('voice')} style={{ marginLeft: '10px', fontSize: '0.8rem', cursor: 'pointer', border: 'none', background: 'transparent', textDecoration: 'underline' }}>
+                <div style={{ fontSize: '0.9rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                    <span>MODO CHAT</span>
+                    <button onClick={() => setMode('voice')} style={{ fontSize: '0.8rem', cursor: 'pointer', border: 'none', background: 'transparent', textDecoration: 'underline' }}>
                         (Pasar a Voz)
                     </button>
+
+                    <span style={{ marginLeft: 8, fontSize: '0.8rem' }}>Idioma:</span>
+                    <div style={{ display: 'inline-flex', gap: 6 }}>
+                        <button
+                            onClick={() => setSpeechLang('es-ES')}
+                            style={{
+                                fontSize: '0.8rem',
+                                padding: '2px 8px',
+                                borderRadius: 8,
+                                border: '1px solid #cbd5e1',
+                                background: speechLang === 'es-ES' ? '#e2e8f0' : 'transparent',
+                                cursor: 'pointer'
+                            }}
+                            title="Castellano"
+                        >
+                            ES
+                        </button>
+                        <button
+                            onClick={() => setSpeechLang('ca-ES')}
+                            style={{
+                                fontSize: '0.8rem',
+                                padding: '2px 8px',
+                                borderRadius: 8,
+                                border: '1px solid #cbd5e1',
+                                background: speechLang === 'ca-ES' ? '#e2e8f0' : 'transparent',
+                                cursor: 'pointer'
+                            }}
+                            title="Català"
+                        >
+                            CA
+                        </button>
+                    </div>
                 </div>
             </div>
 
