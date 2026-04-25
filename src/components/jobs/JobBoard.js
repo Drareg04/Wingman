@@ -2,24 +2,24 @@ import React, { useMemo, useState } from 'react'
 import { offersService } from '../../services/offers'
 
 function JobBoard({ onSelectOffer, onBack }) {
-  const [version, setVersion] = useState(0)
+  const [tick, setTick] = useState(0)
   const [showForm, setShowForm] = useState(false)
   const [query, setQuery] = useState('')
 
   const [newJob, setNewJob] = useState({ title: '', company: '', location: '', url: '', description: '', notes: '' })
 
   const jobs = useMemo(() => {
+    // tick is only used to force recalculation after writes to localStorage
+    void tick
     const all = offersService.getOffers()
     const q = (query || '').trim().toLowerCase()
     if (!q) return all
-    return all.filter(o => {
-      return [o.title, o.company, o.location, o.description].some(v => (v || '').toLowerCase().includes(q))
-    })
-  }, [version, query])
+    return all.filter(o => [o.title, o.company, o.location, o.description].some(v => (v || '').toLowerCase().includes(q)))
+  }, [tick, query])
 
   const activeId = offersService.getActiveOfferId()
 
-  const refresh = () => setVersion(v => v + 1)
+  const refresh = () => setTick(v => v + 1)
 
   const handleAddJob = () => {
     try {
