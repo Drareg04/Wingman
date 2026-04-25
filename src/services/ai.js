@@ -9,33 +9,51 @@ const fallbackFirstQuestion = ({ offerText } = {}) => {
     'Empecemos fuerte: ¿qué logros destacarías de tu última experiencia laboral?',
   ]
 
-  const offer = [
-    'Genial. ¿Qué te ha llamado la atención de esta oferta y por qué crees que encajas?',
-    'Para este puesto, ¿cuáles dirías que son tus 2-3 fortalezas más relevantes?',
-  ]
+  const offer = ['Genial. ¿Qué te ha llamado la atención de esta oferta y por qué crees que encajas?', 'Para este puesto, ¿cuáles dirías que son tus 2-3 fortalezas más relevantes?']
 
   return offerText && offerText.trim() ? pick(offer) : pick(generic)
 }
 
 const formatHistoryToText = history => {
   if (!Array.isArray(history) || history.length === 0) return ''
-  return history
-    .map(m => `${m.role === 'assistant' ? 'Wingman' : 'Candidato'}: ${m.content}`)
-    .join('\n')
+  return history.map(m => `${m.role === 'assistant' ? 'Wingman' : 'Candidato'}: ${m.content}`).join('\n')
+}
+
+const normalizeLang = lang => {
+  const v = String(lang || '').toLowerCase()
+  if (v.startsWith('ca')) return 'ca'
+  if (v.startsWith('es')) return 'es'
+  return 'es'
+}
+
+const getApiBase = () => {
+  // In dev, if CRA proxy isn't configured/working, fall back to the backend port.
+  // Use same-origin when possible to keep it simple.
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname
+    const isLocal = host === 'localhost' || host === '127.0.0.1'
+    if (isLocal) return 'http://localhost:5001'
+  }
+  return ''
+}
+
+async function callGeminiBackend(payload) {
+  const base = getApiBase()
+  const res = await fetch(`${base}/api/gemini`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    throw new Error(text || `HTTP ${res.status}`)
+  }
+
+  return await res.json()
 }
 
 async function geminiRespond({ cvText, offerText, history, language = 'es' }) {
-  const apiKey = process.env.REACT_APP_GEMINI_API_KEY
-  if (!apiKey) return null
-
-  // Lazy import so builds don't break if dependency isn't installed in every env
-  // eslint-disable-next-line no-unused-vars
-  const { GoogleGenerativeAI } = await import('@google/generative-ai')
-
-  const modelName = process.env.REACT_APP_GEMINI_MODEL || 'gemini-1.5-flash'
-  const genAI = new GoogleGenerativeAI(apiKey)
-  const model = genAI.getGenerativeModel({ model: modelName })
-
   const messages = buildChatMessages({
     systemKey: 'interview_system',
     userKey: 'interview_user',
@@ -44,16 +62,53 @@ async function geminiRespond({ cvText, offerText, history, language = 'es' }) {
   })
 
   const historyText = formatHistoryToText(history)
-  const prompt = `${messages[0].content}\n\n${messages[1].content}\n\nHistorial:\n${historyText || '(sin historial)'}\n\nSiguiente turno:`
+  const prompt = `${messages[0].content}\n\n${messages[1].content}${historyText ? `\n\nHistorial:\n${historyText}` : ''}`
 
-  const result = await model.generateContent(prompt)
-  const text = result?.response?.text?.() || ''
-  return text.trim() || null
+  const data = await callGeminiBackend({ prompt })
+  const text = String(data?.text || '').trim()
+  return text || null
 }
 
-export const getWingmanResponse = async (cvText, offerText, history) => {
+export const getAnswerFeedback = async (question, answer, cvText, offerText, { language = 'es' } = {}) => {
+  // Keep signature for existing callers, but use the backend structured mode
+  const locale = normalizeLang(language)
+  const transcript = String(answer || '').trim()
+  if (!transcript) return null
+
   try {
-    const gemini = await geminiRespond({ cvText, offerText, history, language: 'es' })
+    const data = await callGeminiBackend({
+      mode: 'voice_feedback',
+      locale,
+      transcript,
+      cvText: cvText || '',
+      offerText: offerText || '',
+    })
+
+    const feedback = Array.isArray(data?.feedback) ? data.feedback.filter(Boolean) : []
+    const improvedAnswer = String(data?.improvedAnswer || '').trim()
+
+    // Return a readable string to show in UI (existing UI expects string)
+    const lines = []
+    if (feedback.length) {
+      lines.push('Puntos a mejorar:')
+      feedback.slice(0, 3).forEach((f, i) => lines.push(`${i + 1}. ${f}`))
+    }
+    if (improvedAnswer) {
+      lines.push('')
+      lines.push('Respuesta mejorada:')
+      lines.push(improvedAnswer)
+    }
+
+    return lines.join('\n').trim() || null
+  } catch (e) {
+    console.warn('Feedback failed, skipping:', e)
+    return null
+  }
+}
+
+export const getWingmanResponse = async (cvText, offerText, history, { language = 'es' } = {}) => {
+  try {
+    const gemini = await geminiRespond({ cvText, offerText, history, language })
     if (gemini) return gemini
   } catch (e) {
     // fall back below
