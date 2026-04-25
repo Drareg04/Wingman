@@ -15,6 +15,9 @@ function InterviewMode({ cvText, activeOffer, onClearOffer, initialMode = 'chat'
     const recognitionRef = useRef(null);
     const chatEndRef = useRef(null);
 
+    // Live transcript buffer while listening
+    const liveTranscriptRef = useRef('');
+
     // Refs for accessing state in event listeners without re-binding
     const historyRef = useRef(history);
     const modeRef = useRef(mode);
@@ -38,6 +41,7 @@ function InterviewMode({ cvText, activeOffer, onClearOffer, initialMode = 'chat'
 
         setHistory(newHist);
         setUserAnswer('');
+        liveTranscriptRef.current = '';
         setLoading(true);
 
         const res = await getWingmanResponse(cvText, offerContext, newHist);
@@ -78,24 +82,46 @@ function InterviewMode({ cvText, activeOffer, onClearOffer, initialMode = 'chat'
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognitionRef.current = new SpeechRecognition();
-            recognitionRef.current.continuous = false;
+            recognitionRef.current.continuous = true;
+            recognitionRef.current.interimResults = true;
             recognitionRef.current.lang = 'es-ES';
 
             recognitionRef.current.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                setIsListening(false);
+                let interim = '';
+                let finalText = '';
 
-                // Logic based on current mode
-                if (modeRef.current === 'voice') {
-                    // Auto-send in Voice Mode
-                    sendDirectMessage(transcript);
-                } else {
-                    // Accumulate in Chat Mode
-                    setUserAnswer(prev => prev + " " + transcript);
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const res = event.results[i];
+                    const t = res[0]?.transcript || '';
+                    if (res.isFinal) finalText += t;
+                    else interim += t;
+                }
+
+                // Update live buffer
+                if (finalText) {
+                    liveTranscriptRef.current = `${liveTranscriptRef.current} ${finalText}`.trim();
+                }
+
+                // In chat mode show live transcript inside textarea while listening
+                if (modeRef.current !== 'voice') {
+                    const base = liveTranscriptRef.current;
+                    const live = `${base} ${interim}`.trim();
+                    setUserAnswer(live);
+                }
+
+                // In voice mode: when a final chunk arrives, autosend it
+                if (modeRef.current === 'voice' && finalText.trim()) {
+                    setIsListening(false);
+                    try { recognitionRef.current.stop(); } catch (e) { }
+                    const toSend = `${liveTranscriptRef.current}`.trim();
+                    liveTranscriptRef.current = '';
+                    sendDirectMessage(toSend);
                 }
             };
 
-            recognitionRef.current.onend = () => setIsListening(false);
+            recognitionRef.current.onend = () => {
+                setIsListening(false);
+            };
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -108,6 +134,7 @@ function InterviewMode({ cvText, activeOffer, onClearOffer, initialMode = 'chat'
         if (modeRef.current === 'voice') {
             setTimeout(() => {
                 try {
+                    liveTranscriptRef.current = '';
                     recognitionRef.current.start();
                     setIsListening(true);
                 } catch (e) { console.log("Mic auto-start error or already started"); }
@@ -116,14 +143,23 @@ function InterviewMode({ cvText, activeOffer, onClearOffer, initialMode = 'chat'
     };
 
     const toggleListen = () => {
-        if (isListening) { recognitionRef.current.stop(); setIsListening(false); }
-        else { recognitionRef.current.start(); setIsListening(true); }
+        if (!recognitionRef.current) return;
+        if (isListening) {
+            try { recognitionRef.current.stop(); } catch (e) { }
+            setIsListening(false);
+        }
+        else {
+            liveTranscriptRef.current = '';
+            try { recognitionRef.current.start(); } catch (e) { }
+            setIsListening(true);
+        }
     };
 
     const handleSendChat = async () => {
         if (!userAnswer.trim()) return;
         const newHist = [...history, { role: 'user', content: userAnswer }];
         setHistory(newHist); setUserAnswer(''); setLoading(true);
+        liveTranscriptRef.current = '';
 
         const res = await getWingmanResponse(cvText, offerContext, newHist);
 
