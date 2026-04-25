@@ -212,8 +212,6 @@ function AppInner() {
 
 // Helper to decide view based on Auth
 function DashboardWrapper({ onSelectMode, isGuest, onGuestLogin, onOpenAuth }) {
-  const { currentUser } = useAuth()
-
   // Always show Dashboard, bypassing Landing Page. Auth is handled by Navbar
   return <Dashboard onSelectMode={onSelectMode} />
 }
