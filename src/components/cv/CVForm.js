@@ -6,11 +6,22 @@ function CVForm({ data, onChange, onAdd, onRemove }) {
   const sectionStyle = { padding: '20px', borderBottom: '1px solid #eee' }
   const labelStyle = { display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem', color: '#475569' }
 
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        onChange('personalInfo', 'photo', reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div>
       {/* --- PERSONAL INFO --- */}
       <div style={sectionStyle}>
-        <h4 style={{ marginTop: 0 }}>👤 Datos Personales</h4>
+        <h4 style={{ marginTop: 0 }}>Datos Personales</h4>
         <label style={labelStyle}>Nombre Completo</label>
         <input type='text' style={inputStyle} value={data.personalInfo?.name || ''} onChange={e => onChange('personalInfo', 'name', e.target.value)} placeholder='Ej: Ana García' />
         <label style={labelStyle}>Título Profesional</label>
@@ -19,11 +30,20 @@ function CVForm({ data, onChange, onAdd, onRemove }) {
         <input type='text' style={inputStyle} value={data.personalInfo?.email || ''} onChange={e => onChange('personalInfo', 'email', e.target.value)} />
         <label style={labelStyle}>Teléfono</label>
         <input type='text' style={inputStyle} value={data.personalInfo?.phone || ''} onChange={e => onChange('personalInfo', 'phone', e.target.value)} />
+        <label style={labelStyle}>Dirección</label>
+        <input type='text' style={inputStyle} value={data.personalInfo?.address || ''} onChange={e => onChange('personalInfo', 'address', e.target.value)} placeholder='Ej: Madrid, España' />
+        <label style={labelStyle}>Foto de Perfil (Opcional)</label>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+          <input type='file' accept="image/*" onChange={handlePhotoUpload} style={{ flex: 1, padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
+          {data.personalInfo?.photo && (
+            <button onClick={() => onChange('personalInfo', 'photo', '')} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '8px', borderRadius: '4px', cursor: 'pointer' }}>Borrar</button>
+          )}
+        </div>
       </div>
 
       {/* --- SUMMARY --- */}
       <div style={sectionStyle}>
-        <h4 style={{ marginTop: 0 }}>📝 Resumen Profesional</h4>
+        <h4 style={{ marginTop: 0 }}>Resumen Profesional</h4>
         <textarea
           style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }}
           value={data.summary || ''}
@@ -35,7 +55,7 @@ function CVForm({ data, onChange, onAdd, onRemove }) {
       {/* --- EXPERIENCE --- */}
       <div style={sectionStyle}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-          <h4 style={{ marginTop: 0, marginBottom: 0 }}>💼 Experiencia</h4>
+          <h4 style={{ marginTop: 0, marginBottom: 0 }}>Experiencia</h4>
           <button
             onClick={() => onAdd('experience', { role: '', company: '', years: '', description: '' })}
             style={{ background: '#3b82f6', color: 'white', border: 'none', borderRadius: '50%', width: '24px', height: '24px', cursor: 'pointer' }}
@@ -55,7 +75,7 @@ function CVForm({ data, onChange, onAdd, onRemove }) {
             <input type='text' style={inputStyle} value={exp.company} onChange={e => onChange('experience', 'company', e.target.value, index)} placeholder='Empresa' />
             <input type='text' style={inputStyle} value={exp.years} onChange={e => onChange('experience', 'years', e.target.value, index)} placeholder='Fechas (ej. 2020 - 2023)' />
             <textarea
-              style={{ ...inputStyle, height: '60px' }}
+              style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }}
               value={exp.description}
               onChange={e => onChange('experience', 'description', e.target.value, index)}
               placeholder='Logros y responsabilidades...'
@@ -68,7 +88,7 @@ function CVForm({ data, onChange, onAdd, onRemove }) {
       {/* --- EDUCATION --- */}
       <div style={sectionStyle}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-          <h4 style={{ marginTop: 0, marginBottom: 0 }}>🎓 Educación</h4>
+          <h4 style={{ marginTop: 0, marginBottom: 0 }}>Educación</h4>
           <button
             onClick={() => onAdd('education', { degree: '', school: '', year: '', schoolLogo: null })}
             style={{ background: '#3b82f6', color: 'white', border: 'none', borderRadius: '50%', width: '24px', height: '24px', cursor: 'pointer' }}

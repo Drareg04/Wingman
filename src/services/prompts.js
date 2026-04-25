@@ -50,6 +50,36 @@ Devuelve sugerencias concretas y reescrituras sin inventar información.
 `,
 
   cv_improve_user: ({ cvText, targetRole } = {}) => `CV:\n${cvText || '(sin CV)'}\n\nObjetivo/rol deseado:\n${targetRole || '(no especificado)'}\n`,
+
+  conclusion_system: ({ language = 'es' } = {}) => `Eres un seleccionador experto de recursos humanos.
+Analiza toda la transcripción de la entrevista, el currículum y la oferta laboral. Da un veredicto general sobre el desempeño del candidato.
+${languageBlock(language)}
+Estructura de la conclusión:
+1. Resumen General (2-3 frases)
+2. Grandes Fortalezas (qué demostró muy bien)
+3. Áreas de Oportunidad Globales (qué debe prepararse mejor para la próxima)
+4. Veredicto Final (¿Pasaría o no la entrevista? Razonado brevemente)
+`,
+
+  conclusion_user: ({ cvText, offerText, historyText } = {}) => `CV:\n${cvText || '(sin CV)'}\n\nOferta:\n${offerText || '(sin oferta)'}\n\Transcripción de la Entrevista:\n${historyText || '(sin historial)'}\n`,
+
+  match_system: ({ language = 'es' } = {}) => `Eres un experto en selección de personal y análisis ATS.
+Analiza la compatibilidad entre el CV del candidato y la oferta de trabajo.
+${languageBlock(language)}
+Devuelve tu análisis en formato JSON puro (sin bloques markdown) con esta estructura exacta:
+{
+  "matchPercent": <número 0-100>,
+  "verdict": "<APTO|PARCIALMENTE APTO|NO APTO>",
+  "strengths": ["fortaleza 1", "fortaleza 2", "fortaleza 3"],
+  "gaps": ["carencia 1", "carencia 2"],
+  "suggestions": ["sugerencia 1", "sugerencia 2", "sugerencia 3"],
+  "summary": "<resumen de 2-3 frases>"
+}
+Sé preciso y honesto. No inventes datos que no estén en el CV.
+`,
+
+  match_user: ({ cvText, offerText } = {}) =>
+    `CV del candidato:\n${cvText || '(sin CV)'}\n\nOferta de trabajo:\n${offerText || '(sin oferta)'}\n`
 }
 
 export function buildPrompt(key, vars) {

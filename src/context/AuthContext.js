@@ -45,9 +45,12 @@ export function AuthProvider({ children }) {
         return { user: mockUser };
     };
 
-    const updateUserProfile = async (displayName, photoURL) => {
+    const updateUserProfile = async (displayName, photoURL, email) => {
         if (!currentUser) throw new Error("No hay usuario activo.");
         const updatedUser = { ...currentUser, displayName, photoURL };
+        if (email !== undefined) {
+            updatedUser.email = email;
+        }
         setCurrentUser(updatedUser);
         localStorage.setItem('wingman_user', JSON.stringify(updatedUser));
     };
@@ -59,7 +62,6 @@ export function AuthProvider({ children }) {
 
     const value = {
         currentUser,
-        loginWithEmail,
         loginWithEmail,
         registerWithEmail,
         updateUserProfile,

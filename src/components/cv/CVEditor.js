@@ -258,7 +258,7 @@ function CVEditor({ cvId, onBack }) {
             whiteSpace: 'nowrap',
           }}
         >
-          💾 Guardar
+          Guardar
         </button>
       </div>
 
@@ -267,12 +267,12 @@ function CVEditor({ cvId, onBack }) {
         {/* LEFT: Form Panel — scroll inside, fixed height */}
         <div
           style={{
-            width: '280px',
+            width: '360px',
             flexShrink: 0,
             background: 'rgba(255,255,255,0.95)',
             borderRadius: '15px',
             boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
-            padding: '20px',
+            padding: '24px',
             boxSizing: 'border-box',
             height: 'calc(100vh - 160px)',
             overflowY: 'auto',

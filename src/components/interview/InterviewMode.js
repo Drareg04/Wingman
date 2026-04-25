@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getWingmanResponse } from '../../services/ai';
+import { getWingmanResponse, getAnswerFeedback, getInterviewConclusion } from '../../services/ai';
 import TalkingAvatar from './TalkingAvatar';
 import '../../App.css';
 
@@ -8,6 +8,10 @@ function InterviewMode({ cvText, activeOffer, onClearOffer, initialMode = 'chat'
     const [userAnswer, setUserAnswer] = useState('');
     const [loading, setLoading] = useState(false);
     const [mode, setMode] = useState(initialMode);
+    const [interviewFinished, setInterviewFinished] = useState(false);
+    const [conclusionData, setConclusionData] = useState(null);
+    const [isConcluding, setIsConcluding] = useState(false);
+    const MAX_QUESTIONS = 4;
 
     const [isListening, setIsListening] = useState(false);
     const [isSpeaking, setIsSpeaking] = useState(false);
@@ -29,6 +33,18 @@ function InterviewMode({ cvText, activeOffer, onClearOffer, initialMode = 'chat'
             : "ENTREVISTA GENERAL (Soft Skills, trayectoria, ambiciones). No hay puesto específico.";
     }, [activeOffer]);
 
+    // --- HELPER: ASYNC FEEDBACK ---
+    const fetchFeedbackToHistory = async (question, answer, msgIndex) => {
+        const fb = await getAnswerFeedback(question, answer, cvText, offerContext);
+        setHistory(prev => {
+            const newH = [...prev];
+            if (newH[msgIndex]) {
+                newH[msgIndex] = { ...newH[msgIndex], feedback: fb };
+            }
+            return newH;
+        });
+    };
+
     // --- HELPER: SEND MESSAGE DIRECTLY ---
     const sendDirectMessage = async (text) => {
         if (!text.trim()) return;
@@ -36,9 +52,25 @@ function InterviewMode({ cvText, activeOffer, onClearOffer, initialMode = 'chat'
         const currentHistory = historyRef.current;
         const newHist = [...currentHistory, { role: 'user', content: text }];
 
+        const lastQuestion = currentHistory.length > 0 ? currentHistory[currentHistory.length - 1].content : '';
+        const userQIndex = newHist.length - 1;
+
         setHistory(newHist);
         setUserAnswer('');
         setLoading(true);
+
+        fetchFeedbackToHistory(lastQuestion, text, userQIndex);
+
+        const userQuestionsCount = newHist.filter(m => m.role === 'user').length;
+        if (userQuestionsCount >= MAX_QUESTIONS) {
+             setIsConcluding(true);
+             setInterviewFinished(true);
+             const conc = await getInterviewConclusion(cvText, offerContext, newHist);
+             setConclusionData(conc);
+             setIsConcluding(false);
+             setLoading(false);
+             return;
+        }
 
         const res = await getWingmanResponse(cvText, offerContext, newHist);
 
@@ -122,8 +154,25 @@ function InterviewMode({ cvText, activeOffer, onClearOffer, initialMode = 'chat'
 
     const handleSendChat = async () => {
         if (!userAnswer.trim()) return;
+        
+        const lastQuestion = history.length > 0 ? history[history.length - 1].content : '';
         const newHist = [...history, { role: 'user', content: userAnswer }];
+        const userQIndex = newHist.length - 1;
+        
         setHistory(newHist); setUserAnswer(''); setLoading(true);
+
+        fetchFeedbackToHistory(lastQuestion, userAnswer, userQIndex);
+
+        const userQuestionsCount = newHist.filter(m => m.role === 'user').length;
+        if (userQuestionsCount >= MAX_QUESTIONS) {
+             setIsConcluding(true);
+             setInterviewFinished(true);
+             const conc = await getInterviewConclusion(cvText, offerContext, newHist);
+             setConclusionData(conc);
+             setIsConcluding(false);
+             setLoading(false);
+             return;
+        }
 
         const res = await getWingmanResponse(cvText, offerContext, newHist);
 
@@ -137,6 +186,32 @@ function InterviewMode({ cvText, activeOffer, onClearOffer, initialMode = 'chat'
         const synthesis = synthesisRef.current;
         return () => synthesis.cancel();
     }, []);
+
+    // --- RENDER FINISHED MODE ---
+    if (interviewFinished) {
+        return (
+            <div className="panel-card" style={{ height: '85vh', display: 'flex', flexDirection: 'column', overflowY: 'auto', padding: '30px' }}>
+                <h2 style={{ color: '#1e293b', marginBottom: '10px' }}>🎯 Entrevista Finalizada</h2>
+                <p style={{ color: '#64748b', marginBottom: '20px' }}>Has completado las {MAX_QUESTIONS} preguntas. Wingman ha evaluado tu perfil.</p>
+                
+                {isConcluding ? (
+                    <div style={{ textAlign: 'center', margin: '40px 0', fontSize: '1.2rem', color: '#3b82f6' }}>
+                        Analizando respuestas y generando conclusión final... ⏳
+                    </div>
+                ) : (
+                    <div style={{ whiteSpace: 'pre-wrap', background: '#f8fafc', padding: '25px', borderRadius: '15px', border: '1px solid #e2e8f0', color: '#334155', lineHeight: '1.7', fontSize: '1.05rem', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
+                        {conclusionData || 'Hubo un problema al generar la conclusión. Intenta de nuevo.'}
+                    </div>
+                )}
+                
+                <div style={{ marginTop: 'auto', paddingTop: '20px', textAlign: 'center' }}>
+                    <button className="btn-save" onClick={onBack} style={{ padding: '15px 40px', fontSize: '1.1rem' }}>
+                        Volver al Dashboard
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     // --- RENDER VOICE MODE ---
     if (mode === 'voice') {
@@ -252,6 +327,22 @@ function InterviewMode({ cvText, activeOffer, onClearOffer, initialMode = 'chat'
                 {history.map((msg, i) => (
                     <div key={i} className={`msg ${msg.role === 'user' ? 'user-msg' : 'wingman-msg'}`}>
                         {msg.content}
+                        {msg.feedback && (
+                            <div style={{ 
+                                fontSize: '0.85rem', 
+                                background: '#f0f9ff', 
+                                padding: '12px', 
+                                marginTop: '10px', 
+                                borderRadius: '10px', 
+                                color: '#0369a1', 
+                                border: '1px solid #bae6fd',
+                                boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
+                                textAlign: 'left'
+                            }}>
+                                <strong style={{display:'flex', alignItems:'center', gap:'5px', marginBottom:'5px'}}>💡 Feedback Wingman:</strong>
+                                <span style={{ whiteSpace: 'pre-wrap', lineHeight: '1.4' }}>{msg.feedback}</span>
+                            </div>
+                        )}
                     </div>
                 ))}
 

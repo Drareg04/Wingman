@@ -8,9 +8,11 @@ import CVManager from './components/cv/CVManager'
 import CVEditor from './components/cv/CVEditor'
 import CVQuestionnaire from './components/cv/CVQuestionnaire'
 import Navbar from './components/common/Navbar'
+import JobBoard from './components/jobs/JobBoard'
 
 import AuthModal from './components/common/AuthModal'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import ProfileModal from './components/common/ProfileModal'
 import TemplatePickerModal from './components/cv/TemplatePickerModal'
 import InterviewMode from './components/interview/InterviewMode'
 
@@ -24,15 +26,17 @@ function App() {
 
 function AppInner() {
   const [step, setStep] = useState('dashboard')
-  const [isGuest, setIsGuest] = useState(false) // New Guest State
+  const [isGuest, setIsGuest] = useState(false)
 
   // Global Selection State
-  const [activeCVId, setActiveCVId] = useState(null) // Track selected CV
+  const [activeCVId, setActiveCVId] = useState(null)
+  const [activeOffer, setActiveOffer] = useState(null)
 
   // Theme State
-  const [isDarkMode, setIsDarkMode] = useState(false) // New Dark Mode State
-  const [showAuthModal, setShowAuthModal] = useState(false) // Auth Modal State
-  const [authModalMode, setAuthModalMode] = useState('login') // 'login' or 'register'
+  const [isDarkMode, setIsDarkMode] = useState(false)
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [authModalMode, setAuthModalMode] = useState('login')
+  const [showProfileModal, setShowProfileModal] = useState(false)
 
   const { currentUser } = useAuth()
 
@@ -46,7 +50,7 @@ function AppInner() {
 
   const handleSelectMode = mode => {
     if (mode === 'jobs') {
-      // Do nothing
+      setStep('jobs')
     } else if (mode === 'create-cv') {
       setStep('cv-manager')
     } else if (mode === 'create-cv-questions') {
@@ -71,12 +75,16 @@ function AppInner() {
     setStep('cv-editor')
   }
 
+  const handleSelectOffer = (offer) => {
+    setActiveOffer(offer)
+    setStep('interview')
+  }
+
   const [pendingQuestionnaireResult, setPendingQuestionnaireResult] = useState(null)
   const [showTemplatePicker, setShowTemplatePicker] = useState(false)
   const [templateChoice, setTemplateChoice] = useState('modern')
 
   const handleFinishQuestions = async ({ cvName, answers }) => {
-    // Guardamos temporalmente y abrimos selector de plantilla
     setPendingQuestionnaireResult({ cvName, answers })
     setShowTemplatePicker(true)
   }
@@ -87,7 +95,6 @@ function AppInner() {
       const { cvName, answers } = pendingQuestionnaireResult
       const newId = await storageService.createCVFromQuestions(cvName || 'Mi CV', answers, currentUser || undefined)
 
-      // Persistimos template elegido en el CV recién creado
       const cv = await storageService.getCVById(newId, currentUser || undefined)
       if (cv?.data) {
         await storageService.saveCV(newId, { ...cv.data, template: templateChoice }, cv.name || cvName || 'Mi CV', currentUser || undefined)
@@ -107,6 +114,7 @@ function AppInner() {
     <div className={`app-wrapper ${isDarkMode ? 'dark-mode' : ''}`} style={{ minHeight: '100vh', width: '100%' }}>
       {/* Auth Modal overlay for Login/Register */}
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} initialMode={authModalMode} />
+      <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
 
       <div className='sky-container'>
         {/* Background Clouds */}
@@ -129,34 +137,32 @@ function AppInner() {
         </div>
       </div>
 
-      {/* Navbar moved outside of constrained app-content to span full width */}
+      {/* Navbar */}
       <Navbar
         onNavigate={handleSelectMode}
         isDarkMode={isDarkMode}
         toggleDarkMode={() => setIsDarkMode(!isDarkMode)}
         onOpenAuth={openAuthModal}
-        onOpenProfile={() => alert('¡El perfil de usuario estará disponible próximamente!')}
+        onOpenProfile={() => setShowProfileModal(true)}
         isGuest={isGuest}
       />
 
       <div className='app-content'>
         {step === 'dashboard' && <DashboardWrapper onSelectMode={handleSelectMode} isGuest={isGuest} onGuestLogin={handleGuestLogin} onOpenAuth={openAuthModal} />}
 
-        {/* Oculto en Sprint 1
         {step === 'jobs' && (
           <JobBoard
             onSelectOffer={handleSelectOffer}
             onBack={goDashboard}
           />
         )}
-        */}
 
         {step === 'cv-manager' && <CVManager onSelectCV={handleSelectCV} onBack={goDashboard} />}
 
         {step === 'cv-editor' && (
           <CVEditor
             cvId={activeCVId}
-            onBack={() => setStep('cv-manager')} // Back goes to Manager, not Dashboard
+            onBack={() => setStep('cv-manager')}
           />
         )}
 
@@ -165,18 +171,12 @@ function AppInner() {
         {step === 'interview' && (
           <InterviewMode
             cvText={storageService.getCVString(currentUser || undefined)}
-            activeOffer={null}
-            onClearOffer={() => {}}
+            activeOffer={activeOffer}
+            onClearOffer={() => setActiveOffer(null)}
             initialMode={'chat'}
             onBack={goDashboard}
           />
         )}
-
-        {/* Oculto en Sprint 1
-        {step === 'upgrade' && (
-          <UpgradePlan onBack={goDashboard} />
-        )}
-        */}
 
         <TemplatePickerModal
           isOpen={showTemplatePicker}
@@ -187,7 +187,6 @@ function AppInner() {
           selectedTemplate={templateChoice}
           onSelect={t => {
             setTemplateChoice(t)
-            // auto-confirm on click feels snappy
             setTimeout(() => handleConfirmTemplate(), 0)
           }}
         />
@@ -198,9 +197,6 @@ function AppInner() {
 
 // Helper to decide view based on Auth
 function DashboardWrapper({ onSelectMode, isGuest, onGuestLogin, onOpenAuth }) {
-  const { currentUser } = useAuth()
-
-  // Always show Dashboard, bypassing Landing Page. Auth is handled by Navbar
   return <Dashboard onSelectMode={onSelectMode} />
 }
 

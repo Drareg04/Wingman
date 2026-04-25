@@ -47,13 +47,13 @@ const FEATURES = [
     icon: <Mic size={30} />,
     title: 'Modo Voz',
     desc: 'Simula entrevistas\nhablando en vivo',
-    active: false,
+    active: true,
     floatDuration: '7s',
     floatDelay: '0.8s',
     colorClass: 'card-pink',
-    tag: 'PRONTO',
-    tagColor: '#b45309',
-    tagBg: '#fef3c7',
+    tag: 'DISPONIBLE',
+    tagColor: '#16a34a',
+    tagBg: '#dcfce7',
   },
   {
     id: 'cv-fix',
@@ -64,22 +64,22 @@ const FEATURES = [
     floatDuration: '6s',
     floatDelay: '0.2s',
     colorClass: 'card-green',
-    tag: 'PRONTO',
-    tagColor: '#b45309',
-    tagBg: '#fef3c7',
+    tag: 'SPRINT 3',
+    tagColor: '#7c3aed',
+    tagBg: '#ede9fe',
   },
   {
     id: 'jobs',
     icon: <FolderOpen size={30} />,
     title: 'Ofertas',
     desc: 'Busca y gestiona\ntus empleos',
-    active: false,
+    active: true,
     floatDuration: '5.8s',
     floatDelay: '1.2s',
     colorClass: 'card-orange',
-    tag: 'PRONTO',
-    tagColor: '#b45309',
-    tagBg: '#fef3c7',
+    tag: 'DISPONIBLE',
+    tagColor: '#16a34a',
+    tagBg: '#dcfce7',
   },
 ];
 
@@ -104,13 +104,7 @@ function CloudCard({ feature, onAction }) {
 
       {/* Content sits on top of cloud */}
       <div className="cloud-card-content">
-        {/* Tag badge */}
-        <div
-          className="cloud-card-tag"
-          style={{ color: feature.tagColor, background: feature.tagBg, borderColor: feature.tagColor }}
-        >
-          {feature.tag}
-        </div>
+
 
         {/* Icon */}
         <div className="cloud-card-icon">
@@ -140,13 +134,9 @@ export default function Dashboard({ onSelectMode }) {
 
       {/* ── HERO ── */}
       <div className="px-hero">
-        <div className="px-hero-badge">
-          <span className="px-blink">▶</span> WINGMAN OS v2.0 <span className="px-blink">◀</span>
-        </div>
 
         <h1 className="px-hero-title">
           WINGMAN
-          <span className="px-cursor">_</span>
         </h1>
 
         <p className="px-hero-sub">
@@ -158,23 +148,7 @@ export default function Dashboard({ onSelectMode }) {
           {'═'.repeat(40)}
         </div>
 
-        {/* Stats row */}
-        <div className="px-stats">
-          <div className="px-stat">
-            <span className="px-stat-val">100%</span>
-            <span className="px-stat-lbl">FREE-TO-PLAY</span>
-          </div>
-          <div className="px-stat-sep">│</div>
-          <div className="px-stat">
-            <span className="px-stat-val">NEW</span>
-            <span className="px-stat-lbl">IA-DRIVEN</span>
-          </div>
-          <div className="px-stat-sep">│</div>
-          <div className="px-stat">
-            <span className="px-stat-val">TOP</span>
-            <span className="px-stat-lbl">CARGO-RANK</span>
-          </div>
-        </div>
+
       </div>
 
       {/* ── SECTION HEADER ── */}

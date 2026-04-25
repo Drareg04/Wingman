@@ -1,5 +1,5 @@
 // Archivo temporalmente desactivado para el Sprint 1
-import { buildChatMessages, buildPrompt } from './prompts'
+import { buildChatMessages } from './prompts'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const getGeminiKey = () => process.env.REACT_APP_GEMINI_API_KEY
@@ -78,4 +78,100 @@ export const getCVImprovement = async (cvText, offerText, { language = 'es' } = 
   const prompt = `${msgs[0].content}\n\n${msgs[1].content}`
   const res = await model.generateContent(prompt)
   return (res?.response?.text?.() || '').trim()
+}
+
+export const getAnswerFeedback = async (question, answer, cvText, offerText, { language = 'es' } = {}) => {
+  const key = getGeminiKey()
+  if (!key) return null;
+
+  const genAI = new GoogleGenerativeAI(key)
+  const model = genAI.getGenerativeModel({ model: getGeminiModelName() })
+
+  const msgs = buildChatMessages({
+    systemKey: 'feedback_system',
+    userKey: 'feedback_user',
+    vars: { question, answer, cvText, offerText },
+    language,
+  })
+
+  const prompt = `${msgs[0].content}\n\n${msgs[1].content}`
+  try {
+      const res = await model.generateContent(prompt)
+      return res?.response?.text?.() || null
+  } catch (e) {
+      console.error("Gemini Feedback Error:", e)
+      return null
+  }
+}
+
+export const getCVMatchAnalysis = async (cvText, offerText, { language = 'es' } = {}) => {
+  const key = getGeminiKey()
+  if (!key) {
+    // Mock fallback
+    return {
+      matchPercent: 72,
+      verdict: 'PARCIALMENTE APTO',
+      strengths: ['Experiencia relevante en el sector', 'Habilidades técnicas alineadas', 'Buena formación académica'],
+      gaps: ['Falta experiencia con herramientas específicas mencionadas', 'No se menciona nivel de idiomas requerido'],
+      suggestions: ['Añadir certificaciones relevantes al CV', 'Destacar proyectos relacionados con el puesto', 'Incluir métricas de logros anteriores'],
+      summary: 'El candidato presenta un perfil interesante con experiencia relevante, aunque hay algunas lagunas en habilidades específicas que la oferta requiere. Se recomienda adaptar el CV para destacar los puntos de conexión.'
+    }
+  }
+
+  const genAI = new GoogleGenerativeAI(key)
+  const model = genAI.getGenerativeModel({ model: getGeminiModelName() })
+
+  const msgs = buildChatMessages({
+    systemKey: 'match_system',
+    userKey: 'match_user',
+    vars: { cvText, offerText },
+    language,
+  })
+
+  const prompt = `${msgs[0].content}\n\n${msgs[1].content}`
+  try {
+    const res = await model.generateContent(prompt)
+    const raw = (res?.response?.text?.() || '').trim()
+    // Parse the JSON from the response (strip markdown code fences if present)
+    const cleaned = raw.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim()
+    return JSON.parse(cleaned)
+  } catch (e) {
+    console.error('Match Analysis Error:', e)
+    return {
+      matchPercent: 0,
+      verdict: 'ERROR',
+      strengths: [],
+      gaps: [],
+      suggestions: ['No se pudo analizar. Verifica la API key de Gemini.'],
+      summary: 'Error al procesar el análisis.'
+    }
+  }
+}
+
+export const getInterviewConclusion = async (cvText, offerText, history, { language = 'es' } = {}) => {
+  const key = getGeminiKey()
+  if (!key) return `**¡Simulación Finalizada! (Modo de Prueba sin API)**\n\nHas llegado al final de la entrevista de prueba de 4 rondas.\n\nComo actualmente la aplicación no tiene configurada su clave en .env (REACT_APP_GEMINI_API_KEY), este es un progreso simulado y la IA no puede generar tu análisis final.\n\nCuando configures la API de Gemini, recibirás aquí el resumen completo, tus puntos fuertes, áreas de oportunidad y un veredicto general sobre tu desempeño.`;
+
+  const genAI = new GoogleGenerativeAI(key)
+  const model = genAI.getGenerativeModel({ model: getGeminiModelName() })
+
+  const msgs = buildChatMessages({
+    systemKey: 'conclusion_system',
+    userKey: 'conclusion_user',
+    vars: {
+      cvText,
+      offerText,
+      historyText: historyToText(history)
+    },
+    language,
+  })
+
+  const prompt = `${msgs[0].content}\n\n${msgs[1].content}`
+  try {
+      const res = await model.generateContent(prompt)
+      return res?.response?.text?.() || null
+  } catch (e) {
+      console.error("Gemini Conclusion Error:", e)
+      return null
+  }
 }

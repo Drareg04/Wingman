@@ -48,7 +48,7 @@ function Navbar({ onNavigate, onStartTutorial, isDarkMode, toggleDarkMode, onOpe
             {/* Simulated Desktop Links */}
             {(currentUser || isGuest) && (
                 <div className="tour-nav-links" style={{ display: 'flex', gap: '30px' }}>
-                    {['INICIO', 'ENTREVISTAS', 'MIS CVS'].map(link => (
+                    {['INICIO', 'ENTREVISTAS', 'MIS CVS', 'OFERTAS'].map(link => (
                         <span
                             key={link}
                             onClick={() => {
@@ -57,6 +57,7 @@ function Navbar({ onNavigate, onStartTutorial, isDarkMode, toggleDarkMode, onOpe
                                 } else {
                                     if (link === 'ENTREVISTAS') onNavigate('interview');
                                     else if (link === 'MIS CVS') onNavigate('cv-manager');
+                                    else if (link === 'OFERTAS') onNavigate('jobs');
                                 }
                             }}
                             style={{

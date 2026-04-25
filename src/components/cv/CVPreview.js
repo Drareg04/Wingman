@@ -35,8 +35,9 @@ function LegacyTemplate({ data, template }) {
                         {data.personalInfo?.title || "TÍTULO PROFESIONAL"}
                     </h2>
                     <div style={{ fontSize: '12px', color: '#555', display: 'flex', gap: '20px', justifyContent: template === 'minimalist' ? 'center' : 'flex-start', flexWrap: 'wrap' }}>
-                        <span>📧 {data.personalInfo?.email || "email@ejemplo.com"}</span>
-                        <span>📱 {data.personalInfo?.phone || "+34 123 456 789"}</span>
+                        <span>{data.personalInfo?.email || "email@ejemplo.com"}</span>
+                        <span>{data.personalInfo?.phone || "+34 123 456 789"}</span>
+                        {data.personalInfo?.address && <span>{data.personalInfo.address}</span>}
                     </div>
                 </div>
                 {data.personalInfo?.photo && (
@@ -132,8 +133,8 @@ function ProY2KTemplate({ data }) {
                         <div style={{ padding: '20px', display: 'flex', gap: '20px' }}>
                             <div style={{ flex: 1 }}>
                                 <h1 style={{ margin: '0 0 5px 0', fontSize: '46px', lineHeight: '1', color: '#111827', textTransform: 'uppercase' }}>
-                                    {data.personalInfo?.name?.split(' ')[0] || "NOMBRE"}<br />
-                                    {data.personalInfo?.name?.split(' ').slice(1).join(' ') || "APELLIDO"}
+                                    {data.personalInfo?.name ? data.personalInfo.name.split(' ')[0] : "NOMBRE"}<br />
+                                    {data.personalInfo?.name ? data.personalInfo.name.split(' ').slice(1).join(' ') : "APELLIDO"}
                                 </h1>
                                 <h3 style={{ margin: '0 0 15px 0', fontSize: '20px', color: '#4b5563' }}>{data.personalInfo?.title || "Rol Profesional"}</h3>
                                 <p style={{ fontSize: '14px', lineHeight: '1.2', color: '#374151' }}>{data.summary || "Soy una persona creativa y entusiasta, con el objetivo de fusionar la estética con la funcionalidad."}</p>
@@ -249,7 +250,7 @@ function ProEditorialTemplate({ data }) {
                 </div>
                 <div style={{ textAlign: 'right' }}>
                     <div>ADDRESS</div>
-                    <div style={{ color: '#6b7280' }}>[{data.personalInfo?.email || "ANYWHERE ST, CITY"}]</div>
+                    <div style={{ color: '#6b7280' }}>[{data.personalInfo?.address || "ANYWHERE ST, CITY"}]</div>
                 </div>
             </div>
 
@@ -344,10 +345,10 @@ function ProEditorialTemplate({ data }) {
             {/* Giant Name at Bottom */}
             <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', paddingTop: '40px' }}>
                 <div style={{ fontSize: '90px', fontWeight: '900', color: '#374151', lineHeight: '0.8', textTransform: 'uppercase', letterSpacing: '-2px' }}>
-                    {data.personalInfo?.name?.split(' ')[0] || "AVERY"}
+                    {data.personalInfo?.name ? data.personalInfo.name.split(' ')[0] : "AVERY"}
                 </div>
                 <div style={{ fontSize: '90px', fontWeight: '900', color: '#374151', lineHeight: '0.8', textTransform: 'uppercase', letterSpacing: '-2px' }}>
-                    {data.personalInfo?.name?.split(' ').slice(1).join(' ') || "DAVIS"}
+                    {data.personalInfo?.name ? data.personalInfo.name.split(' ').slice(1).join(' ') : "DAVIS"}
                 </div>
             </div>
 
@@ -381,9 +382,9 @@ function ProDarkTemplate({ data }) {
                     {data.personalInfo?.title || "WEB DESIGNER"}
                 </h3>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', marginTop: '20px', fontSize: '14px', color: '#d1d5db' }}>
-                    <span>📞 {data.personalInfo?.phone || "123-456-7890"}</span>
-                    <span>✉️ {data.personalInfo?.email || "hola@web.com"}</span>
-                    <span>📍 {data.personalInfo?.address || "Madrid, ES"}</span>
+                    <span>{data.personalInfo?.phone || "123-456-7890"}</span>
+                    <span>{data.personalInfo?.email || "hola@web.com"}</span>
+                    <span>{data.personalInfo?.address || "Madrid, ES"}</span>
                 </div>
             </div>
 
@@ -502,9 +503,9 @@ function ProBorderTemplate({ data }) {
                         </h2>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '25px', color: blue, fontSize: '14px', fontWeight: 'bold' }}>
-                            <span>📞 {data.personalInfo?.phone || "+123-456-7890"}</span>
-                            <span>✉️ {data.personalInfo?.email || "hello@site.com"}</span>
-                            <span>📍 {data.personalInfo?.address || "123 Anywhere, City"}</span>
+                            <span>{data.personalInfo?.phone || "+123-456-7890"}</span>
+                            <span>{data.personalInfo?.email || "hello@site.com"}</span>
+                            <span>{data.personalInfo?.address || "123 Anywhere, City"}</span>
                         </div>
                     </div>
 
