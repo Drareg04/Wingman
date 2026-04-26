@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import './App.css'
 import { storageService } from './services/storage'
 import { offersService } from './services/offers'
@@ -41,6 +41,17 @@ function AppInner() {
   const [showProfileModal, setShowProfileModal] = useState(false)
 
   const { currentUser } = useAuth()
+
+  // Lightweight route protection: if not logged in (and not guest),
+  // allow dashboard only (everything else requires auth or guest mode).
+  useEffect(() => {
+    const isProtectedStep =
+      step !== 'dashboard' && step !== 'upgrade'
+
+    if (!currentUser && !isGuest && isProtectedStep) {
+      setStep('dashboard')
+    }
+  }, [currentUser, isGuest, step])
 
   const openAuthModal = (mode = 'login') => {
     setAuthModalMode(mode)

@@ -1,4 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { 
+    signInWithEmailAndPassword, 
+    createUserWithEmailAndPassword, 
+    signOut, 
+    onAuthStateChanged, 
+    updateProfile 
+} from 'firebase/auth';
+import { auth } from '../services/firebase';
 
 const AuthContext = createContext();
 
@@ -11,53 +19,45 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Simulate checking if a user is already logged in (Local Storage could be used, but for now we keep it simple)
-        const savedUser = localStorage.getItem('wingman_user');
-        if (savedUser) {
-            setCurrentUser(JSON.parse(savedUser));
-        }
-        setLoading(false);
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setCurrentUser(user);
+            setLoading(false);
+        });
+
+        return unsubscribe;
     }, []);
 
     const loginWithEmail = async (email, password) => {
-        // Mock instant login
-        const mockUser = {
-            uid: '12345mock',
-            email: email,
-            displayName: email.split('@')[0],
-            photoURL: ''
-        };
-        setCurrentUser(mockUser);
-        localStorage.setItem('wingman_user', JSON.stringify(mockUser));
-        return { user: mockUser };
+        return await signInWithEmailAndPassword(auth, email, password);
     };
 
     const registerWithEmail = async (email, password, displayName) => {
-        // Mock instant registration
-        const mockUser = {
-            uid: '12345mock_new',
-            email: email,
-            displayName: displayName || email.split('@')[0],
-            photoURL: ''
-        };
-        setCurrentUser(mockUser);
-        localStorage.setItem('wingman_user', JSON.stringify(mockUser));
-        return { user: mockUser };
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        if (displayName) {
+            await updateProfile(userCredential.user, {
+                displayName: displayName
+            });
+            // Update local state to reflect the new displayName immediately
+            setCurrentUser({ ...userCredential.user, displayName });
+        }
+        return userCredential;
     };
 
     const updateUserProfile = async (displayName, photoURL, email) => {
-        if (!currentUser) throw new Error("No hay usuario activo.");
-        const updatedUser = { ...currentUser, displayName, photoURL };
-        if (email !== undefined) {
-            updatedUser.email = email;
-        }
-        setCurrentUser(updatedUser);
-        localStorage.setItem('wingman_user', JSON.stringify(updatedUser));
+        if (!auth.currentUser) throw new Error("No hay usuario activo.");
+        
+        await updateProfile(auth.currentUser, { 
+            displayName: displayName || auth.currentUser.displayName, 
+            photoURL: photoURL || auth.currentUser.photoURL 
+        });
+
+        // We skip updateEmail here because Firebase usually requires re-authentication for sensitive actions
+        // But we update the local context state so the UI reacts
+        setCurrentUser({ ...auth.currentUser, displayName, photoURL });
     };
 
     const logout = async () => {
-        setCurrentUser(null);
-        localStorage.removeItem('wingman_user');
+        await signOut(auth);
     };
 
     const value = {

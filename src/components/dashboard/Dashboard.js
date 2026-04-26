@@ -116,7 +116,7 @@ function CloudCard({ feature, onAction }) {
 
         {feature.active ? (
           <div className={`cloud-card-cta ${pressed ? 'cloud-card-cta-pressed' : ''}`}>
-            [EJECUTAR]
+            [ACCEDER]
           </div>
         ) : (
           <div className="cloud-card-cta" style={{ background: '#94a3b8', fontSize: '0.9rem' }}>
@@ -140,8 +140,8 @@ export default function Dashboard({ onSelectMode }) {
         </h1>
 
         <p className="px-hero-sub">
-          Tu centro de mando IA para dominar el mercado laboral.<br />
-          Optimiza tu carrera con las herramientas más potentes.
+          Domina el mercado laboral con tus herramientas en un solo lugar.<br />
+          Optimiza tu carrera con las funciones más potentes.
         </p>
 
         <div className="px-hero-divider">

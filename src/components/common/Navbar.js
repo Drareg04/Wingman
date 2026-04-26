@@ -1,16 +1,9 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Sun, Moon } from 'lucide-react';
 
 function Navbar({ onNavigate, onStartTutorial, isDarkMode, toggleDarkMode, onOpenAuth, onOpenProfile, isGuest }) {
     const { currentUser, logout } = useAuth();
-
-    // Auto-redirect to dashboard (Landing Page) if logged out while inside a protected step
-    useEffect(() => {
-        if (!currentUser && !isGuest) {
-            onNavigate('dashboard');
-        }
-    }, [currentUser, isGuest, onNavigate]);
 
     return (
         <nav style={{
