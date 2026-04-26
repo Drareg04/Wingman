@@ -27,4 +27,5 @@ yarn-error.log*
 .env
 .env.bak
 .env*
+!/.env.example
 keys_backup.txt

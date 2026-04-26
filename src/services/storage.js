@@ -54,7 +54,7 @@ const asArray = value => {
 const splitList = text => {
   if (!text) return []
   return text
-    .split(/\n|,|;|\u2022|\-/g)
+    .split(/\n|,|;|\u2022|-/g)
     .map(s => s.trim())
     .filter(Boolean)
 }

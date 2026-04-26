@@ -16,9 +16,6 @@ const templates = [
 ]
 
 function TemplateSelector({ selectedTemplate, onSelect }) {
-  // Para la demo, el usuario ha pedido dejar las plantillas gratis por ahora.
-  const userIsPro = true
-
   const handleSelect = tpl => {
     onSelect(tpl.id)
   }
