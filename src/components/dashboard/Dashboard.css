@@ -154,8 +154,9 @@
    CLOUD CARDS GRID
    ════════════════════════════════════════ */
 .cloud-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 24px;
   padding: 20px 0;
   max-width: 1000px;
@@ -166,6 +167,8 @@
 .cloud-card {
   position: relative;
   width: 100%;
+  flex: 1 1 280px;
+  max-width: 310px;
   aspect-ratio: 1.5 / 1;
   display: flex;
   align-items: center;
