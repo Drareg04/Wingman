@@ -42,16 +42,7 @@ function AppInner() {
 
   const { currentUser } = useAuth()
 
-  // Lightweight route protection: if not logged in (and not guest),
-  // allow dashboard only (everything else requires auth or guest mode).
-  useEffect(() => {
-    const isProtectedStep =
-      step !== 'dashboard' && step !== 'upgrade'
 
-    if (!currentUser && !isGuest && isProtectedStep) {
-      setStep('dashboard')
-    }
-  }, [currentUser, isGuest, step])
 
   const openAuthModal = (mode = 'login') => {
     setAuthModalMode(mode)
@@ -62,6 +53,14 @@ function AppInner() {
   const goDashboard = () => setStep('dashboard')
 
   const handleSelectMode = mode => {
+    const isProtectedStep = mode !== 'dashboard' && mode !== 'upgrade'
+    
+    // Si no está logueado ni es invitado y trata de entrar a un módulo, mostrar modal
+    if (!currentUser && !isGuest && isProtectedStep) {
+      openAuthModal('login')
+      return
+    }
+
     if (mode === 'jobs') {
       setStep('jobs')
     } else if (mode === 'create-cv') {
@@ -70,12 +69,8 @@ function AppInner() {
       setStep('cv-questions')
     } else if (mode === 'interview' || mode === 'voice') {
       setStep('interview')
-    } else if (mode === 'cv-fix') {
-      // Do nothing
     } else if (mode === 'dashboard') {
       setStep('dashboard')
-    } else if (mode === 'upgrade') {
-      // Do nothing
     }
   }
 
