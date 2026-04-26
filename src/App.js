@@ -174,15 +174,6 @@ function AppInner() {
           />
         )}
 
-        {step === 'interview' && (
-          <InterviewMode
-            cvText={storageService.getCVString()}
-            activeOffer={offersService.getActiveOffer()}
-            onClearOffer={() => offersService.clearActiveOffer()}
-            initialMode={'chat'}
-            onBack={goDashboard}
-          />
-        )}
 
         {step === 'cv-manager' && <CVManager onSelectCV={handleSelectCV} onBack={goDashboard} />}
 
@@ -198,8 +189,11 @@ function AppInner() {
         {step === 'interview' && (
           <InterviewMode
             cvText={storageService.getCVString(currentUser || undefined)}
-            activeOffer={activeOffer}
-            onClearOffer={() => setActiveOffer(null)}
+            activeOffer={activeOffer || offersService.getActiveOffer()}
+            onClearOffer={() => {
+              setActiveOffer(null)
+              offersService.clearActiveOffer()
+            }}
             initialMode={'chat'}
             onBack={goDashboard}
           />
