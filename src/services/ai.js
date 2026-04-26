@@ -161,3 +161,30 @@ export const getInterviewConclusion = async (cvText, offerText, history, { langu
     return null
   }
 }
+
+export const getCVMatchAnalysis = async (cvText, offerText, { language = 'es' } = {}) => {
+  const messages = buildChatMessages({
+    systemKey: 'match_system',
+    userKey: 'match_user',
+    vars: { cvText, offerText },
+    language: normalizeLang(language),
+  })
+
+  const prompt = `${messages[0].content}\n\n${messages[1].content}`
+  try {
+    const data = await callGeminiBackend({ prompt })
+    const raw = String(data?.text || '').trim()
+    const cleaned = raw.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim()
+    return JSON.parse(cleaned)
+  } catch (e) {
+    console.error('Match Analysis Error:', e)
+    return {
+      matchPercent: 0,
+      verdict: 'ERROR',
+      strengths: [],
+      gaps: [],
+      suggestions: ['No se pudo analizar. Verifica la API key de Gemini.'],
+      summary: 'Error al procesar el análisis.'
+    }
+  }
+}
