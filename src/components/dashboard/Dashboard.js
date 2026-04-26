@@ -55,19 +55,7 @@ const FEATURES = [
     tagColor: '#16a34a',
     tagBg: '#dcfce7',
   },
-  {
-    id: 'cv-fix',
-    icon: <Sparkles size={30} />,
-    title: 'Mejora CV',
-    desc: 'Revisión IA de\ntu currículum',
-    active: false,
-    floatDuration: '6s',
-    floatDelay: '0.2s',
-    colorClass: 'card-green',
-    tag: 'SPRINT 3',
-    tagColor: '#7c3aed',
-    tagBg: '#ede9fe',
-  },
+
   {
     id: 'jobs',
     icon: <FolderOpen size={30} />,
